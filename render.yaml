@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: smartdocq-backend
+    env: python
+    rootDir: backend
+    plan: free
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    startCommand: python simple_server.py
+    envVars:
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      # Add your own keys/secrets here on Render dashboard or set defaults below
+      # - key: GEMINI_API_KEY
+      #   sync: false
+      # - key: MONGODB_URI
+      #   sync: false
+      # - key: JWT_SECRET
+      #   sync: false
+
+  - type: web
+    name: smartdocq-frontend
+    env: python
+    rootDir: frontend
+    plan: free
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    startCommand: streamlit run app.py --server.port $PORT --server.address 0.0.0.0
+    envVars:
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      # Point this to your backend URL after the backend is live
+      # - key: BACKEND_BASE_URL
+      #   value: https://smartdocq-backend.onrender.com
+
