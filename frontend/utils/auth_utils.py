@@ -6,7 +6,7 @@ import streamlit as st
 from typing import Dict, Any, Optional, Tuple
 
 # API endpoint
-API_URL = os.getenv("API_URL", "http://localhost:8000/api")
+API_URL = os.getenv("API_URL", "https://smartdocq.onrender.com/api")
 
 
 def login_user(username: str, password: str) -> Tuple[bool, str]:
