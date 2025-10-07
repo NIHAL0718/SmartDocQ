@@ -27,6 +27,8 @@ services:
     envVars:
       - key: PYTHONUNBUFFERED
         value: "1"
+      - key: API_URL
+        value: https://smartdocq.onrender.com/api
       # Point this to your backend URL after the backend is live
       # - key: BACKEND_BASE_URL
       #   value: https://smartdocq-backend.onrender.com
