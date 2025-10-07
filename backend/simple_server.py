@@ -52,18 +52,13 @@ app.add_middleware(
 
 # Configure Uvicorn to exclude logs directory from file watching
 import uvicorn
-import os
-
-port = int(os.environ.get("PORT", 10000))
-
 uvicorn_config = uvicorn.Config(
     "simple_server:app",
     host="0.0.0.0",
-    port=port,
-    reload=False,  # Disable reload for production
+    port=8000,
+    reload=True,
     reload_excludes=["logs/*", "*.log"]
 )
-
 
 # Translation router
 translation_router = APIRouter()
@@ -1915,4 +1910,5 @@ I couldn't find relevant information in the document related to your question. Y
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("simple_server:app", host="0.0.0.0", port=port, reload=True)
+    port = int(os.environ.get("PORT", "8000"))
+    uvicorn.run("simple_server:app", host="0.0.0.0", port=port, reload=False)
