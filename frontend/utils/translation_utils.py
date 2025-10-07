@@ -7,7 +7,7 @@ import time
 import unicodedata
 
 # API endpoint
-API_URL = os.getenv("API_URL", "https://smartdocq.onrender.com/api")
+API_URL = "https://smartdocq.onrender.com/api"
 
 
 def check_backend_connection():

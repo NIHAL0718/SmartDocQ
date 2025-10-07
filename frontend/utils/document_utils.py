@@ -17,7 +17,7 @@ def poll_document_status(doc_id):
     """
     try:
         # Get API URL from environment or use default
-        API_URL = os.getenv("API_URL", "https://smartdocq.onrender.com/api")
+        API_URL = "https://smartdocq.onrender.com/api"
         
         # Make API call to get document status
         status_url = f"{API_URL}/documents/status/{doc_id}"
@@ -112,7 +112,7 @@ def display_document_list(documents, set_current=False, show_actions=False):
                             import requests
                             
                             # Get API URL from environment or use default
-                            API_URL = os.getenv("API_URL", "https://smartdocq.onrender.com/api")
+                            API_URL = "https://smartdocq.onrender.com/api"
                             
                             # Make API call to get questions
                             questions_url = f"{API_URL}/documents/{doc['id']}/questions"

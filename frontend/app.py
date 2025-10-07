@@ -35,7 +35,7 @@ st.set_page_config(
 apply_custom_css()
 
 # API endpoint
-API_URL = os.getenv("API_URL", "https://smartdocq.onrender.com/api")
+API_URL = "https://smartdocq.onrender.com/api"
 
 # Initialize session state
 if "chat_history" not in st.session_state:
@@ -1056,8 +1056,7 @@ def show_translation_page():
                 import requests
                 
                 # Get API URL from environment or use default
-                API_URL = os.getenv("API_URL", "https://smartdocq.onrender.com/api")
-                
+                API_URL = "https://smartdocq.onrender.com/api"                
                 # Make API call to get document content
                 doc_id = st.session_state.current_document['id']
                 content_url = f"{API_URL}/documents/{doc_id}/content"
