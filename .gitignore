@@ -1,0 +1,43 @@
+# Python bytecode and caches
+**/__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environments and environment files
+venv/
+backend/venv/
+.env
+.env.*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+backend/logs/**
+!backend/logs/.gitkeep
+rate_limit_log.txt
+
+# Data and databases
+backend/data/chroma/**
+backend/data/vector_db/**
+backend/data/documents/**
+!backend/data/documents/.gitkeep
+*.sqlite3
+backend/data/**/*.sqlite3
+
+# Uploads (user-generated)
+backend/uploads/**
+!backend/uploads/.gitkeep
+
+# Frontend caches/build
+frontend/**/__pycache__/
+.streamlit/
+
+# Auth or secrets
+frontend/auth_data.json
+
+
