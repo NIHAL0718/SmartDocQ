@@ -43,7 +43,7 @@ class Settings(BaseSettings):
     DOCUMENT_STORE_PATH: str = os.getenv("DOCUMENT_STORE_PATH", "./data/documents")
     
     # MongoDB Settings
-    MONGODB_URI: str = os.getenv("MONGODB_URI", "mongodb://localhost:27017")
+    MONGODB_URI: str = os.getenv("MONGODB_URI", "mongodb+srv://SmartDocQ:Nihal2020@cluster0.wizo9.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
     MONGODB_DB_NAME: str = os.getenv("MONGODB_DB_NAME", "smartdocq")
     MONGODB_USER_COLLECTION: str = os.getenv("MONGODB_USER_COLLECTION", "users")
     

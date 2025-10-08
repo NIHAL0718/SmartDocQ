@@ -149,8 +149,66 @@ import sys
 import os
 sys.path.append(os.path.dirname(__file__))
 
-from app.services.user_service import create_user, authenticate_user
-from app.models.user import UserCreate
+# Try to use real authentication, fallback to simple if MongoDB is not available
+try:
+    from app.services.user_service import create_user, authenticate_user
+    from app.models.user import UserCreate
+    from app.utils.db_utils import client
+    
+    # Test MongoDB connection
+    client.server_info()
+    USE_REAL_AUTH = True
+    print("✅ Using real authentication with MongoDB Atlas")
+except Exception as e:
+    print(f"⚠️  MongoDB not available: {e}")
+    USE_REAL_AUTH = False
+    print("Using simplified authentication (MongoDB not connected)")
+
+# Simple in-memory user storage for fallback
+SIMPLE_USERS = {
+    "demo": {
+        "username": "demo",
+        "email": "demo@smartdocq.com",
+        "password": "demo123",
+        "user_id": "user_demo"
+    },
+    "test": {
+        "username": "test",
+        "email": "test@smartdocq.com", 
+        "password": "test123",
+        "user_id": "user_test"
+    }
+}
+
+def simple_create_user(username: str, email: str, password: str) -> bool:
+    """Simple user creation without database."""
+    print(f"Simple create user called for: {username}")
+    if username in SIMPLE_USERS:
+        print(f"User {username} already exists")
+        return False
+    SIMPLE_USERS[username] = {
+        "username": username,
+        "email": email,
+        "password": password,  # In real app, this would be hashed
+        "user_id": f"user_{len(SIMPLE_USERS) + 1}"
+    }
+    print(f"User {username} created successfully. Total users: {len(SIMPLE_USERS)}")
+    return True
+
+def simple_authenticate_user(username: str, password: str) -> dict:
+    """Simple user authentication without database."""
+    if username in SIMPLE_USERS and SIMPLE_USERS[username]["password"] == password:
+        user = SIMPLE_USERS[username]
+        return {
+            "access_token": f"token_{user['user_id']}_{username}",
+            "token_type": "bearer",
+            "user": {
+                "id": user["user_id"],
+                "username": username,
+                "email": user["email"]
+            }
+        }
+    return None
 
 @auth_router.post("/login/json", response_model=AuthResponse)
 async def login_json(request: LoginRequest):
@@ -158,8 +216,12 @@ async def login_json(request: LoginRequest):
     password = request.password
     
     try:
-        # Use real authentication service
-        auth_result = authenticate_user(username, password)
+        if USE_REAL_AUTH:
+            # Use real authentication service
+            auth_result = authenticate_user(username, password)
+        else:
+            # Use simple authentication
+            auth_result = simple_authenticate_user(username, password)
         
         if auth_result:
             return AuthResponse(
@@ -186,42 +248,72 @@ async def login_json(request: LoginRequest):
 
 @auth_router.post("/register", response_model=AuthResponse)
 async def register(request: RegisterRequest):
+    print(f"Registration attempt for username: {request.username}")
+    print(f"USE_REAL_AUTH: {USE_REAL_AUTH}")
     try:
-        # Create user data object
-        user_data = UserCreate(
-            username=request.username,
-            email=request.email,
-            password=request.password
-        )
-        
-        # Use real user service to create user
-        user_response = create_user(user_data)
-        
-        if user_response:
-            # Generate token for the new user
-            auth_result = authenticate_user(request.username, request.password)
+        if USE_REAL_AUTH:
+            # Use real user service to create user
+            user_data = UserCreate(
+                username=request.username,
+                email=request.email,
+                password=request.password
+            )
+            user_response = create_user(user_data)
             
-            if auth_result:
-                return AuthResponse(
-                    success=True,
-                    message="Registration successful",
-                    token=auth_result.get("access_token"),
-                    user_id=user_response.id
-                )
+            if user_response:
+                # Generate token for the new user
+                auth_result = authenticate_user(request.username, request.password)
+                
+                if auth_result:
+                    return AuthResponse(
+                        success=True,
+                        message="Registration successful",
+                        token=auth_result.get("access_token"),
+                        user_id=user_response.id
+                    )
+                else:
+                    return AuthResponse(
+                        success=True,
+                        message="Registration successful, but login failed",
+                        token=None,
+                        user_id=user_response.id
+                    )
             else:
                 return AuthResponse(
-                    success=True,
-                    message="Registration successful, but login failed",
+                    success=False,
+                    message="Username or email already exists",
                     token=None,
-                    user_id=user_response.id
+                    user_id=None
                 )
         else:
-            return AuthResponse(
-                success=False,
-                message="Username or email already exists",
-                token=None,
-                user_id=None
-            )
+            # Use simple registration
+            success = simple_create_user(request.username, request.email, request.password)
+            
+            if success:
+                # Generate token for the new user
+                auth_result = simple_authenticate_user(request.username, request.password)
+                
+                if auth_result:
+                    return AuthResponse(
+                        success=True,
+                        message="Registration successful",
+                        token=auth_result.get("access_token"),
+                        user_id=auth_result.get("user", {}).get("id")
+                    )
+                else:
+                    return AuthResponse(
+                        success=True,
+                        message="Registration successful, but login failed",
+                        token=None,
+                        user_id=None
+                    )
+            else:
+                return AuthResponse(
+                    success=False,
+                    message="Username already exists",
+                    token=None,
+                    user_id=None
+                )
     except Exception as e:
         print(f"Registration error: {e}")
         return AuthResponse(
@@ -431,7 +523,7 @@ async def root():
 @app.get("/health", tags=["Health"])
 async def health_check():
     """Health check endpoint."""
-    return {"status": "healthy"}
+    return {"status": "healthy", "auth_mode": "simple" if not USE_REAL_AUTH else "real", "users_count": len(SIMPLE_USERS)}
 
 # Translation endpoints
 # Custom JSONResponse class to handle Unicode properly

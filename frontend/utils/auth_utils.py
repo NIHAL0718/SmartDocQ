@@ -78,6 +78,13 @@ def login_user(username: str, password: str) -> Tuple[bool, str]:
         return False, "Connection error. Please check if the backend server is running."
     except requests.exceptions.Timeout:
         return False, "Connection timed out. The server might be busy, please try again."
+    except requests.exceptions.HTTPError as e:
+        if e.response.status_code == 502:
+            return False, "Server is temporarily unavailable. Please try again in a few moments."
+        elif e.response.status_code == 500:
+            return False, "Server error. Please try again later."
+        else:
+            return False, f"HTTP error {e.response.status_code}. Please try again."
     except Exception as e:
         print(f"Unexpected login error: {str(e)}")
         return False, f"Login error: {str(e)}"
@@ -133,6 +140,13 @@ def register_user(username: str, password: str, email: Optional[str] = None) -> 
         return False, "Connection error. Please check if the backend server is running."
     except requests.exceptions.Timeout:
         return False, "Connection timed out. The server might be busy, please try again."
+    except requests.exceptions.HTTPError as e:
+        if e.response.status_code == 502:
+            return False, "Server is temporarily unavailable. Please try again in a few moments."
+        elif e.response.status_code == 500:
+            return False, "Server error. Please try again later."
+        else:
+            return False, f"HTTP error {e.response.status_code}. Please try again."
     except Exception as e:
         print(f"Unexpected registration error: {str(e)}")
         return False, f"Registration error: {str(e)}"
