@@ -18,7 +18,7 @@ def check_backend_connection():
     """
     try:
         # Try to connect to the health endpoint
-        response = requests.get(f"{API_URL.split('/api')[0]}/health", timeout=2)
+        response = requests.get(f"{API_URL.split('/api')[0]}/health", timeout=10)
         return response.status_code == 200
     except requests.exceptions.RequestException:
         return False
@@ -55,7 +55,7 @@ def translate_text(text, target_language, source_language=None):
         response = requests.post(
             f"{API_URL}/translation/translate",
             json=data,
-            timeout=10  # Add timeout to prevent hanging
+            timeout=60  # Increased timeout for translation processing
         )
         
         # Check if request was successful
@@ -169,7 +169,7 @@ def get_supported_languages():
     
     try:
         # Make API request with timeout
-        response = requests.get(f"{API_URL}/translation/languages", timeout=5)
+        response = requests.get(f"{API_URL}/translation/languages", timeout=30)
         
         # Check if request was successful
         response.raise_for_status()
@@ -236,7 +236,7 @@ def detect_language(text):
         response = requests.post(
             f"{API_URL}/translation/detect-language",
             json={"text": text},
-            timeout=5  # Add timeout to prevent hanging
+            timeout=30  # Increased timeout for language detection
         )
         
         # Check if request was successful
@@ -301,7 +301,7 @@ def text_to_text_translate(text, target_language, source_language=None):
         response = requests.post(
             f"{API_URL}/translation/text-to-text",  # New endpoint for text-to-text translation
             json=data,
-            timeout=15  # Slightly longer timeout as text-to-text might take more time
+            timeout=60  # Increased timeout for text-to-text translation
         )
         
         # Check if request was successful

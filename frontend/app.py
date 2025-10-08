@@ -22,6 +22,7 @@ from utils.chat_utils import display_chat_history, add_message_to_history
 from utils.ui_utils import show_success, show_error, show_info, apply_custom_css
 from utils.translation_utils import translate_text, text_to_text_translate, get_supported_languages, detect_language, check_backend_connection
 from utils.auth_utils import login_user, register_user, logout_user, is_authenticated, get_current_user
+from utils.api_utils import make_upload_request_with_retry, make_chat_request_with_retry, make_get_request_with_retry
 
 # Set page configuration
 st.set_page_config(
@@ -379,12 +380,12 @@ def show_upload_page():
                     files = {"file": (uploaded_file.name, uploaded_file.getvalue(), f"application/{uploaded_file.type.split('/')[-1]}")}
                     form_data = {"title": title if title else uploaded_file.name, "language": "english"}
                     
-                    # Make API call to upload document
+                    # Make API call to upload document with retry
                     upload_url = f"{API_URL}/documents/upload"
-                    response = requests.post(upload_url, files=files, data=form_data)
+                    success, response, error = make_upload_request_with_retry(upload_url, files, form_data)
                     
                     # Check if upload was successful
-                    if response.status_code == 200:
+                    if success and response and response.status_code == 200:
                         upload_data = response.json()
                         doc_id = upload_data.get("id")
                         doc_title = upload_data.get("title") or (title if title else uploaded_file.name)
@@ -419,9 +420,9 @@ def show_upload_page():
                         # Get questions from the backend
                         try:
                             questions_url = f"{API_URL}/documents/{doc_id}/questions"
-                            questions_response = requests.get(questions_url)
+                            success, questions_response, error = make_get_request_with_retry(questions_url, base_timeout=60)
                             
-                            if questions_response.status_code == 200:
+                            if success and questions_response and questions_response.status_code == 200:
                                 questions_data = questions_response.json()
                                 st.session_state.important_questions = questions_data.get("questions", [])
                             else:
@@ -446,7 +447,8 @@ def show_upload_page():
                         
                         show_success(f"Document '{doc_title}' uploaded successfully!")
                     else:
-                        show_error(f"Failed to upload document: {response.text}")
+                        error_msg = error if error else (response.text if response else "Unknown error")
+                        show_error(f"Failed to upload document: {error_msg}")
                 except Exception as e:
                     show_error(f"Error uploading document: {str(e)}")
     
@@ -515,12 +517,12 @@ def show_chat_page():
                     "document_id": st.session_state.current_document["id"]
                 }
                 
-                # Make API call to get the answer
+                # Make API call to get the answer with retry
                 answer_url = f"{API_URL}/chat/question"
-                response = requests.post(answer_url, json=data)
+                success, response, error = make_chat_request_with_retry(answer_url, data)
                 
                 # Check if request was successful
-                if response.status_code == 200:
+                if success and response and response.status_code == 200:
                     response_data = response.json()
                     answer = response_data.get("answer", "Sorry, I couldn't generate an answer.")
                     sources = response_data.get("sources", [])
@@ -581,7 +583,7 @@ def show_chat_page():
                     
                     # Make API call to get the answer
                     answer_url = f"{API_URL}/chat/question"
-                    response = requests.post(answer_url, json=data)
+                    success, response, error = make_chat_request_with_retry(answer_url, data)
                     
                     # Check if request was successful
                     if response.status_code == 200:
@@ -599,7 +601,8 @@ def show_chat_page():
                         # Fallback to a generic answer if API call fails
                         answer = f"Sorry, I couldn't process your question. Error: {response.text}"
                         add_message_to_history("assistant", answer, [])
-                        show_error(f"Failed to get answer: {response.text}")
+                        error_msg = error if error else (response.text if response else "Unknown error")
+                        show_error(f"Failed to get answer: {error_msg}")
                 except Exception as e:
                     # Fallback to a generic answer if an exception occurs
                     answer = f"Sorry, I couldn't process your question due to an error."
@@ -645,7 +648,7 @@ def show_chat_page():
                     
                     # Make API call to get the answer
                     answer_url = f"{API_URL}/chat/question"
-                    response = requests.post(answer_url, json=data)
+                    success, response, error = make_chat_request_with_retry(answer_url, data)
                     
                     # Check if request was successful
                     if response.status_code == 200:
@@ -663,7 +666,8 @@ def show_chat_page():
                         # Fallback to a generic answer if API call fails
                         answer = f"Sorry, I couldn't process your question. Error: {response.text}"
                         add_message_to_history("assistant", answer, [])
-                        show_error(f"Failed to get answer: {response.text}")
+                        error_msg = error if error else (response.text if response else "Unknown error")
+                        show_error(f"Failed to get answer: {error_msg}")
                 except Exception as e:
                     # Fallback to a generic answer if an exception occurs
                     answer = f"Sorry, I couldn't process your question due to an error."
@@ -701,7 +705,7 @@ def show_chat_page():
                             
                             # Make API call to get the answer
                             answer_url = f"{API_URL}/chat/question"
-                            response = requests.post(answer_url, json=data)
+                            success, response, error = make_chat_request_with_retry(answer_url, data)
                             
                             # Check if request was successful
                             if response.status_code == 200:
@@ -724,7 +728,8 @@ def show_chat_page():
                                 # Fallback to a generic answer if API call fails
                                 answer = f"Sorry, I couldn't process your question. Error: {response.text}"
                                 add_message_to_history("assistant", answer, [])
-                                show_error(f"Failed to get answer: {response.text}")
+                                error_msg = error if error else (response.text if response else "Unknown error")
+                        show_error(f"Failed to get answer: {error_msg}")
                         except Exception as e:
                             # Fallback to a generic answer if an exception occurs
                             answer = f"Sorry, I couldn't process your question due to an error."
@@ -1062,9 +1067,9 @@ def show_translation_page():
                 content_url = f"{API_URL}/documents/{doc_id}/content"
                 
                 with st.spinner("Loading document content..."):
-                    content_response = requests.get(content_url)
+                    success, content_response, error = make_get_request_with_retry(content_url, base_timeout=60)
                     
-                    if content_response.status_code == 200:
+                    if success and content_response and content_response.status_code == 200:
                         content_data = content_response.json()
                         document_text = content_data.get("content", "")
                         
@@ -1135,7 +1140,8 @@ def show_translation_page():
                                     mime="text/plain"
                                 )
                     else:
-                        st.error(f"Error loading document content: {content_response.status_code}")
+                        error_msg = error if error else (f"HTTP {content_response.status_code}" if content_response else "Unknown error")
+                        st.error(f"Error loading document content: {error_msg}")
                         st.info("Please make sure the backend server is running and the document is properly processed.")
             except Exception as e:
                 st.error(f"Error accessing document content: {str(e)}")

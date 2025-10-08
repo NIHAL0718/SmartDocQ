@@ -27,7 +27,7 @@ def login_user(username: str, password: str) -> Tuple[bool, str]:
         response = requests.post(
             f"{API_URL}/auth/login/json",
             json={"username": username, "password": password},
-            timeout=10
+            timeout=30
         )
         
         # Print response for debugging
@@ -106,7 +106,7 @@ def register_user(username: str, password: str, email: Optional[str] = None) -> 
         response = requests.post(
             f"{API_URL}/auth/register",
             json=user_data,
-            timeout=10
+            timeout=30
         )
         
         # Print response for debugging
