@@ -726,10 +726,10 @@ def show_chat_page():
                                     st.audio(audio_data, format="audio/mp3")
                             else:
                                 # Fallback to a generic answer if API call fails
-                                answer = f"Sorry, I couldn't process your question. Error: {response.text}"
-                                add_message_to_history("assistant", answer, [])
                                 error_msg = error if error else (response.text if response else "Unknown error")
-                        show_error(f"Failed to get answer: {error_msg}")
+                                answer = f"Sorry, I couldn't process your question. Error: {error_msg}"
+                                add_message_to_history("assistant", answer, [])
+                                show_error(f"Failed to get answer: {error_msg}")
                         except Exception as e:
                             # Fallback to a generic answer if an exception occurs
                             answer = f"Sorry, I couldn't process your question due to an error."
