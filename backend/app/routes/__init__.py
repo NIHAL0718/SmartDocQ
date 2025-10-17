@@ -1,0 +1,1 @@
+"""Routes package for SmartDocQ API."""
