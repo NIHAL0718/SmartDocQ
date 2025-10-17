@@ -12,6 +12,8 @@ from app.api.feedback import router as feedback_router
 from app.api.chat import router as chat_router
 from app.api.ocr import router as ocr_router
 from app.api.translation import router as translation_router
+# Add auth routes
+from app.routes.auth import router as auth_router
 
 # Load environment variables
 load_dotenv()
@@ -39,6 +41,7 @@ app.include_router(feedback_router, prefix="/api/feedback", tags=["Feedback"])
 app.include_router(chat_router, prefix="/api/chat", tags=["Chat"])
 app.include_router(ocr_router, prefix="/api/ocr", tags=["OCR"])
 app.include_router(translation_router, prefix="/api/translation", tags=["Translation"])
+app.include_router(auth_router, prefix="/api/auth", tags=["Auth"])
 
 
 @app.get("/", tags=["Root"])
