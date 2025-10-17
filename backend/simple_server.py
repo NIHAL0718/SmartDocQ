@@ -47,7 +47,13 @@ app = FastAPI(
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, replace with specific origins
+    allow_origins=[
+        "*",  # Allow all origins for now
+        "https://smart-doc-4o5kgx5j4-nihal-chandras-projects.vercel.app",
+        "https://smart-doc.vercel.app",
+        "http://localhost:3000",
+        "http://localhost:5173"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
