@@ -3,7 +3,7 @@ import api from '../services/api.js'
 import { useApp } from '../context/AppContext.jsx'
 
 // Backend-based TTS controller with Stop toggle and graceful fallback
-const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:8000/api')
+const API_BASE = (import.meta.env.VITE_API_URL || 'https://smartdocq-2.onrender.com/api')
 function useBackendTTSController(){
   const [isPlaying, setIsPlaying] = useState(false)
   const abortRef = useRef(false)
