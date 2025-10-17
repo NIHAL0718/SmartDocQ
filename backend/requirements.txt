@@ -41,3 +41,4 @@ langdetect==1.0.9
 # CORS
 fastapi-cors==0.0.6
 pymongo==4.7.3
+pydantic-settings>=2.0.3
