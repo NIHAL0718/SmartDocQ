@@ -1,31 +1,56 @@
-aiohttp==3.11.11
-beautifulsoup4==4.14.2
-chromadb==1.1.1
-deep_translator==1.11.4
-easyocr==1.7.2
-fastapi==0.119.0
-fitz==0.0.1.dev2
-gTTS==2.5.4
+# Backend dependencies for Python 3.10.14
+
+# FastAPI and server
+fastapi==0.104.1
+uvicorn[standard]==0.23.2
+python-multipart==0.0.6
+pydantic==2.4.2
+
+# Document processing
+pypdf2==3.0.1
+python-docx==1.0.1
+beautifulsoup4==4.12.2
+requests==2.31.0
+
+# Vector database and embeddings
+chromadb==0.4.18
+faiss-cpu==1.9.0
+sentence-transformers==2.2.0
+
+# AI and language processing
+langchain==0.0.335
+langchain-google-genai==0.0.5
+google-generativeai==0.3.1
+huggingface-hub==0.21.4
 langdetect==1.0.9
-numpy==2.3.4
-opencv_contrib_python==4.11.0.86
-opencv_python_headless==4.12.0.88
-passlib==1.7.4
-Pillow==12.0.0
-protobuf==6.33.0
-pydantic==2.12.2
-pydantic_settings==2.11.0
-PyJWT==2.10.1
-PyJWT==2.10.1
-pymongo==4.15.3
-PyPDF2==3.0.1
-pytesseract==0.3.13
-python-dotenv==1.1.1
-python_docx==1.2.0
-pytz==2024.2
-PyYAML==6.0.2
-PyYAML==6.0.3
-Requests==2.32.5
-scikit_learn==1.7.2
-sentence_transformers==5.0.0
-uvicorn==0.37.0
+
+# OCR
+pytesseract==0.3.10
+easyocr==1.7.1
+
+# Speech processing
+gTTS==2.3.2
+
+# Authentication and security
+PyJWT==2.9.0
+passlib[bcrypt]==1.7.4
+
+# Translation
+deep_translator==1.11.4
+
+# Image processing
+Pillow==10.0.0
+opencv-python-headless==4.8.1.78
+
+# PDF processing
+PyMuPDF==1.23.8
+
+# Database
+pymongo==4.7.3
+
+# Utilities
+python-dotenv==1.0.0
+numpy==1.24.3
+pandas==2.0.3
+pydantic-settings==2.0.3
+PyYAML==6.0.1
