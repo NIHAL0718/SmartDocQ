@@ -28,17 +28,17 @@ export function AuthProvider({ children }) {
   const login = async (username, password) => {
     try {
       const resp = await api.post('/auth/login/json', { username, password })
-      // Backend returns: { access_token, token_type, user }
-      if (resp && resp.access_token) {
-        const u = resp.user || { username }
-        const accessToken = resp.access_token
+      // Backend returns: { success, message, token, user_id }
+      if (resp && resp.success && resp.token) {
+        const u = { username, user_id: resp.user_id || '' }
+        const accessToken = resp.token
         setUser(u)
         setToken(accessToken)
         api.setToken(accessToken)
         localStorage.setItem(AUTH_KEY, JSON.stringify({ user: u, token: accessToken }))
         return { ok: true }
       }
-      return { ok: false, error: resp?.message || resp?.detail || 'Login failed' }
+      return { ok: false, error: resp?.message || 'Login failed' }
     } catch (e) {
       const msg = e?.response?.data?.detail || e?.message || 'Login failed due to server error'
       return { ok: false, error: msg }
@@ -48,11 +48,11 @@ export function AuthProvider({ children }) {
   const register = async (username, password, email) => {
     try {
       const resp = await api.post('/auth/register', { username, password, ...(email ? { email } : {}) })
-      // On success backend returns created user object
-      if (resp && (resp.id || resp.username)) {
-        return { ok: true, message: 'Registration successful' }
+      // Backend returns: { success, message, token, user_id }
+      if (resp && resp.success) {
+        return { ok: true, message: resp.message || 'Registration successful' }
       }
-      return { ok: false, error: resp?.message || resp?.detail || 'Registration failed' }
+      return { ok: false, error: resp?.message || 'Registration failed' }
     } catch (e) {
       const msg = e?.response?.data?.detail || e?.message || 'Registration failed'
       return { ok: false, error: msg }
