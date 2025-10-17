@@ -17,12 +17,12 @@ from ..core.config import settings
 # Initialize logger
 logger = get_logger("security_utils")
 
-# Initialize password context
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Initialize password context using PBKDF2 to avoid bcrypt length limits and binary wheels issues
+pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 
 
 def generate_password_hash(password: str) -> str:
-    """Generate a password hash using bcrypt.
+    """Generate a password hash.
     
     Args:
         password (str): Plain text password
