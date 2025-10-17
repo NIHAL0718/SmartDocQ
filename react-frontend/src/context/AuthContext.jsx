@@ -26,22 +26,37 @@ export function AuthProvider({ children }) {
   const isAuthenticated = !!token
 
   const login = async (username, password) => {
-    const resp = await api.post('/auth/login/json', { username, password })
-    if (resp.success) {
-      const u = { username, user_id: resp.user_id || '' }
-      setUser(u)
-      setToken(resp.token)
-      api.setToken(resp.token)
-      localStorage.setItem(AUTH_KEY, JSON.stringify({ user: u, token: resp.token }))
-      return { ok: true }
+    try {
+      const resp = await api.post('/auth/login/json', { username, password })
+      // Backend returns: { access_token, token_type, user }
+      if (resp && resp.access_token) {
+        const u = resp.user || { username }
+        const accessToken = resp.access_token
+        setUser(u)
+        setToken(accessToken)
+        api.setToken(accessToken)
+        localStorage.setItem(AUTH_KEY, JSON.stringify({ user: u, token: accessToken }))
+        return { ok: true }
+      }
+      return { ok: false, error: resp?.message || resp?.detail || 'Login failed' }
+    } catch (e) {
+      const msg = e?.response?.data?.detail || e?.message || 'Login failed due to server error'
+      return { ok: false, error: msg }
     }
-    return { ok: false, error: resp.message || 'Login failed' }
   }
 
   const register = async (username, password, email) => {
-    const resp = await api.post('/auth/register', { username, password, ...(email ? { email } : {}) })
-    if (resp.success) return { ok: true, message: resp.message || 'Registration successful' }
-    return { ok: false, error: resp.message || resp.detail || 'Registration failed' }
+    try {
+      const resp = await api.post('/auth/register', { username, password, ...(email ? { email } : {}) })
+      // On success backend returns created user object
+      if (resp && (resp.id || resp.username)) {
+        return { ok: true, message: 'Registration successful' }
+      }
+      return { ok: false, error: resp?.message || resp?.detail || 'Registration failed' }
+    } catch (e) {
+      const msg = e?.response?.data?.detail || e?.message || 'Registration failed'
+      return { ok: false, error: msg }
+    }
   }
 
   const logout = () => {
